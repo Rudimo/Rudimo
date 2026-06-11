@@ -1,9 +1,9 @@
 <!-- ╔══════════════════════════════════════════════════════════════╗ -->
-<!-- ║                    Dmitry Kshevsky · @Rudimo                  ║ -->
+<!-- ║              Dmitrii Kshevskii · DK · @Rudimo                 ║ -->
 <!-- ╚══════════════════════════════════════════════════════════════╝ -->
 
 <a href="https://github.com/Rudimo">
-  <img width="100%" src="https://capsule-render.vercel.app/api?type=waving&color=0:8A2BE2,100:00C2FF&height=220&section=header&text=Dmitry%20Kshevsky&fontSize=58&fontColor=ffffff&fontAlignY=38&desc=Tech%20Lead%20·%20CTO%20·%20AI%20%26%20Web3%20Engineer&descAlignY=60&descSize=20&animation=fadeIn" alt="header"/>
+  <img width="100%" src="https://capsule-render.vercel.app/api?type=waving&color=0:8A2BE2,100:00C2FF&height=220&section=header&text=Dmitrii%20Kshevskii&fontSize=56&fontColor=ffffff&fontAlignY=36&desc=DK%20·%20aka%20RudiRacer%20·%20aka%20easy%20movie%20—%20Founder%20%26%20CTO%20·%20AI%20%26%20Web3%20Engineer&descAlignY=58&descSize=18&animation=fadeIn" alt="header"/>
 </a>
 
 <p align="center">
@@ -17,7 +17,9 @@
   &nbsp;
   <img src="https://img.shields.io/badge/Based%20in-Phuket%20%F0%9F%8F%9D%EF%B8%8F-00C2FF?style=flat-square" alt="location"/>
   &nbsp;
-  <img src="https://img.shields.io/badge/Also%20a-Racer%20%F0%9F%8F%8E%EF%B8%8F-FF3860?style=flat-square" alt="racer"/>
+  <img src="https://img.shields.io/badge/aka-RudiRacer%20%F0%9F%8F%8E%EF%B8%8F-FF3860?style=flat-square" alt="racer"/>
+  &nbsp;
+  <img src="https://img.shields.io/badge/aka-easy%20movie%20%F0%9F%8E%AC-FFD700?style=flat-square" alt="easy movie"/>
 </p>
 
 ---
@@ -25,13 +27,14 @@
 ### 🧠 About me
 
 ```ts
-const dmitry = {
-  role:      ["CTO", "Tech Lead", "Full-stack Engineer"],
-  pronouns:  "ship it / iterate",
+const dk = {
+  name:      "Dmitrii Kshevskii",          // friends call me DK
+  aliases:   ["RudiRacer 🏎️", "easy movie 🎬"],
+  role:      ["Founder & CTO", "Tech Lead", "Full-stack Engineer"],
   baseline:  "12+ years, idea → high-load production",
   building:  "AI-native creator tools on Telegram + TON",
   focus:     ["AI / LLM agents", "Web3 / TON", "real-time systems", "DX & polish"],
-  driving:   "off the keyboard, I'm on a track 🏎️",
+  offKeyboard: "on a race track or behind a camera",
 };
 ```
 
@@ -40,6 +43,7 @@ const dmitry = {
 - ⛓️ All-in on **Web3 / TON** and **Telegram Mini Apps** — no classic websites: auth, payments and UX live entirely inside Telegram.
 - 🎬 Building **Timeline Studio** — a **Tauri + Rust + FFmpeg** desktop video editor for streamers & creators.
 - 🕹️ Background in **high-load real-time gaming platforms** — microservices, websockets, millions of events a day.
+- 🏎️ **RudiRacer** on the track, **easy movie** behind the camera — speed and storytelling feed back into how I build.
 - 🧩 I care about **developer experience**, clean architecture, and products that feel alive.
 
 ---
@@ -101,8 +105,9 @@ const dmitry = {
 
 <p>
   <a href="https://postim.life"><img src="https://img.shields.io/badge/Website-postim.life-00C2FF?style=flat-square&logo=safari&logoColor=white"/></a>
-  <a href="mailto:rudimo@yandex.ru"><img src="https://img.shields.io/badge/Email-rudimo-8A2BE2?style=flat-square&logo=maildotru&logoColor=white"/></a>
+  <a href="https://kshevsky.com"><img src="https://img.shields.io/badge/Site-kshevsky.com-8A2BE2?style=flat-square&logo=safari&logoColor=white"/></a>
+  <a href="mailto:rudimo@yandex.ru"><img src="https://img.shields.io/badge/Email-rudimo-FF3860?style=flat-square&logo=maildotru&logoColor=white"/></a>
   <a href="https://wakatime.com/@RudiRacer"><img src="https://img.shields.io/badge/WakaTime-@RudiRacer-1A1A1A?style=flat-square&logo=wakatime&logoColor=white"/></a>
 </p>
 
-<sub>⚡ Coding from Phuket · racing on weekends · always shipping.</sub>
+<sub>⚡ DK · RudiRacer · easy movie — coding from Phuket, racing on weekends, always shipping.</sub>
