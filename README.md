@@ -88,7 +88,7 @@ const dmitry = {
 
 <p align="center">
   <img height="170" src="https://github-readme-stats.vercel.app/api/top-langs/?username=Rudimo&layout=compact&theme=tokyonight&hide_border=true&bg_color=0D1117&title_color=00C2FF&langs_count=10&count_private=true" alt="top langs"/>
-  <img height="170" src="https://github-readme-stats.vercel.app/api/wakatime?username=rudimo&theme=tokyonight&hide_border=true&bg_color=0D1117&title_color=00C2FF&text_color=ffffff&layout=compact" alt="wakatime"/>
+  <img height="170" src="https://github-readme-stats.vercel.app/api/wakatime?username=RudiRacer&theme=tokyonight&hide_border=true&bg_color=0D1117&title_color=00C2FF&text_color=ffffff&layout=compact" alt="wakatime"/>
 </p>
 
 <p align="center">
@@ -102,7 +102,7 @@ const dmitry = {
 <p>
   <a href="https://postim.life"><img src="https://img.shields.io/badge/Website-postim.life-00C2FF?style=flat-square&logo=safari&logoColor=white"/></a>
   <a href="mailto:rudimo@yandex.ru"><img src="https://img.shields.io/badge/Email-rudimo-8A2BE2?style=flat-square&logo=maildotru&logoColor=white"/></a>
-  <a href="https://wakatime.com/@rudimo"><img src="https://img.shields.io/badge/WakaTime-@rudimo-1A1A1A?style=flat-square&logo=wakatime&logoColor=white"/></a>
+  <a href="https://wakatime.com/@RudiRacer"><img src="https://img.shields.io/badge/WakaTime-@RudiRacer-1A1A1A?style=flat-square&logo=wakatime&logoColor=white"/></a>
 </p>
 
 <sub>⚡ Coding from Phuket · racing on weekends · always shipping.</sub>
