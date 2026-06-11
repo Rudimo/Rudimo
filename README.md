@@ -105,7 +105,6 @@ const dk = {
 
 <p>
   <a href="https://postim.life"><img src="https://img.shields.io/badge/Website-postim.life-00C2FF?style=flat-square&logo=safari&logoColor=white"/></a>
-  <a href="https://kshevsky.com"><img src="https://img.shields.io/badge/Site-kshevsky.com-8A2BE2?style=flat-square&logo=safari&logoColor=white"/></a>
   <a href="mailto:rudimo@yandex.ru"><img src="https://img.shields.io/badge/Email-rudimo-FF3860?style=flat-square&logo=maildotru&logoColor=white"/></a>
   <a href="https://wakatime.com/@RudiRacer"><img src="https://img.shields.io/badge/WakaTime-@RudiRacer-1A1A1A?style=flat-square&logo=wakatime&logoColor=white"/></a>
 </p>
