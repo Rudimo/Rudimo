@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🏆 PUBG Турнир — Калькулятор очков</title>
+<style>
+  :root{
+    --bg:#0d0f14; --card:#161922; --card2:#1d2129; --line:#2a2f3a;
+    --txt:#e8eaed; --muted:#9aa3b2; --accent:#f5a623; --accent2:#ffcf5c;
+    --good:#3ecf8e; --bad:#ff5d5d; --gold:#ffd34e; --silver:#cfd6e0; --bronze:#d6915b;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+       color:var(--txt);line-height:1.45;-webkit-text-size-adjust:100%;
+       background:
+         radial-gradient(900px 400px at 50% -120px, rgba(245,166,35,.18), transparent 70%),
+         radial-gradient(600px 500px at 90% 10%, rgba(62,207,142,.08), transparent 70%),
+         var(--bg)}
+  header{position:relative;padding:30px 16px 24px;text-align:center;overflow:hidden;
+         background:linear-gradient(180deg,rgba(245,166,35,.10),transparent);
+         border-bottom:1px solid var(--line)}
+  header::after{content:"";position:absolute;left:0;right:0;bottom:0;height:2px;
+         background:linear-gradient(90deg,transparent,var(--accent),transparent)}
+  .brand{display:inline-flex;align-items:center;gap:10px;font-size:11px;letter-spacing:3px;
+         text-transform:uppercase;color:var(--accent);font-weight:800;margin-bottom:6px}
+  .brand .dot{width:5px;height:5px;border-radius:50%;background:var(--accent);box-shadow:0 0 10px var(--accent)}
+  header h1{margin:0;font-size:30px;font-weight:900;letter-spacing:1px;
+         background:linear-gradient(180deg,#fff,#ffcf5c);-webkit-background-clip:text;
+         background-clip:text;-webkit-text-fill-color:transparent;text-shadow:0 2px 30px rgba(245,166,35,.25)}
+  header h1 .pan{-webkit-text-fill-color:initial;filter:drop-shadow(0 0 12px rgba(245,166,35,.5))}
+  header p{margin:8px 0 0;color:var(--muted);font-size:13px}
+  .badge420{display:inline-block;margin-top:10px;padding:3px 12px;border-radius:20px;font-size:12px;
+         font-weight:800;letter-spacing:1px;color:#0d0f14;
+         background:linear-gradient(90deg,var(--good),var(--accent2));box-shadow:0 0 18px rgba(62,207,142,.35)}
+  .wrap{max-width:760px;margin:0 auto;padding:16px}
+  .card{background:linear-gradient(180deg,var(--card),#13161d);border:1px solid var(--line);
+        border-radius:16px;padding:16px;margin-bottom:14px;box-shadow:0 6px 24px rgba(0,0,0,.25)}
+  .lb-row:nth-child(1){background:linear-gradient(90deg,rgba(255,211,78,.14),var(--card2));
+        border:1px solid rgba(255,211,78,.35);box-shadow:0 0 22px rgba(255,211,78,.12)}
+  .lb-row:nth-child(1) .lb-rank::before{content:"👑";position:absolute;margin-top:-26px;font-size:15px}
+  h2{font-size:15px;margin:0 0 10px;color:var(--accent2);text-transform:uppercase;letter-spacing:.6px}
+  label{display:block;font-size:12px;color:var(--muted);margin:0 0 4px}
+  input,select{width:100%;padding:9px 10px;background:var(--card2);border:1px solid var(--line);
+        border-radius:9px;color:var(--txt);font-size:15px;outline:none}
+  input:focus,select:focus{border-color:var(--accent)}
+  button{cursor:pointer;border:none;border-radius:9px;font-weight:600;font-size:14px;padding:9px 14px;
+          background:var(--accent);color:#1a1206;transition:.15s}
+  button:hover{background:var(--accent2)}
+  button.ghost{background:transparent;border:1px solid var(--line);color:var(--txt)}
+  button.ghost:hover{border-color:var(--accent);color:var(--accent2)}
+  button.danger{background:transparent;border:1px solid #5a2a2a;color:#ff8e8e}
+  button.danger:hover{background:#2a1414}
+  .row{display:flex;gap:8px;flex-wrap:wrap;align-items:end}
+  .row>div{flex:1;min-width:70px}
+  .settings .row>div{min-width:110px}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th,td{padding:7px 6px;text-align:center;border-bottom:1px solid var(--line)}
+  th{color:var(--muted);font-weight:600;font-size:11px;text-transform:uppercase}
+  td.l,th.l{text-align:left}
+  .pts{color:var(--accent2);font-weight:700}
+  .pill{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;background:var(--card2);color:var(--muted)}
+  .lb-row{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:11px;background:var(--card2);margin-bottom:8px}
+  .lb-rank{position:relative;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-weight:800;flex:none;background:#2a2f3a}
+  .lb-row:nth-child(1) .lb-rank{background:var(--gold);color:#1a1206}
+  .lb-row:nth-child(2) .lb-rank{background:var(--silver);color:#1a1206}
+  .lb-row:nth-child(3) .lb-rank{background:var(--bronze);color:#1a1206}
+  .lb-name{flex:1;font-weight:700;font-size:16px}
+  .lb-sub{color:var(--muted);font-size:12px;font-weight:400}
+  .lb-pts{font-size:20px;font-weight:800;color:var(--accent2)}
+  .muted{color:var(--muted);font-size:12px}
+  .tabs{display:flex;gap:6px;overflow-x:auto;margin-bottom:12px;padding-bottom:2px}
+  .tab{white-space:nowrap;padding:8px 14px;border-radius:20px;background:var(--card2);color:var(--muted);
+       cursor:pointer;font-size:13px;border:1px solid transparent}
+  .tab.active{background:var(--accent);color:#1a1206;font-weight:700}
+  .preview{background:var(--card2);border-radius:9px;padding:8px 10px;font-size:13px;margin-top:8px;color:var(--muted)}
+  .preview b{color:var(--accent2)}
+  .toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+  .empty{text-align:center;color:var(--muted);padding:24px 10px;font-size:13px}
+  details summary{cursor:pointer;color:var(--accent2);font-size:13px;margin-bottom:8px}
+  .del{color:var(--bad);cursor:pointer;font-size:16px;user-select:none}
+  footer{text-align:center;color:var(--muted);font-size:12px;padding:18px}
+  footer a{color:var(--accent)}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand"><span class="dot"></span>Phuket · Asia Server<span class="dot"></span></div>
+  <h1><span class="pan">🍳</span> PUBG ТУРНИР</h1>
+  <p>Калькулятор очков: топ + килы + урон · сохраняется в браузере</p>
+  <span class="badge420">🌴 420 LOBBY 🌴</span>
+</header>
+
+<div class="wrap">
+
+  <!-- Игроки -->
+  <div class="card">
+    <h2>Игроки</h2>
+    <div class="row">
+      <div style="flex:3"><label>Имя игрока</label><input id="newPlayer" placeholder="Например, RudiRacer" maxlength="24"></div>
+      <div style="flex:1"><button onclick="addPlayer()">+ Добавить</button></div>
+    </div>
+    <div id="playerList" style="margin-top:10px"></div>
+  </div>
+
+  <!-- Добавить катку -->
+  <div class="card">
+    <h2>Добавить катку</h2>
+    <div class="row">
+      <div style="flex:2"><label>Игрок</label><select id="mPlayer"></select></div>
+      <div><label>Место (топ)</label><input id="mPlace" type="number" min="1" max="100" inputmode="numeric" placeholder="1"></div>
+      <div><label>Килы</label><input id="mKills" type="number" min="0" inputmode="numeric" placeholder="0"></div>
+      <div><label>Урон</label><input id="mDmg" type="number" min="0" inputmode="numeric" placeholder="0"></div>
+    </div>
+    <div class="preview" id="livePreview">Введите данные катки — покажу очки.</div>
+    <div class="toolbar"><button onclick="addMatch()">Записать катку</button></div>
+  </div>
+
+  <!-- Таблица лидеров -->
+  <div class="card">
+    <h2>Таблица лидеров</h2>
+    <div class="row" style="margin-bottom:10px">
+      <div><label>Зачёт по лучшим N каткам (0 = все)</label><input id="bestN" type="number" min="0" value="0" inputmode="numeric" onchange="saveCfg();render()"></div>
+    </div>
+    <div id="leaderboard"></div>
+  </div>
+
+  <!-- Детали по игрокам -->
+  <div class="card">
+    <h2>Катки по игрокам</h2>
+    <div class="tabs" id="detailTabs"></div>
+    <div id="detail"></div>
+  </div>
+
+  <!-- Настройки очков -->
+  <div class="card settings">
+    <h2>Настройки очков</h2>
+    <div class="row">
+      <div><label>Очки за килл</label><input id="cfgKill" type="number" min="0" value="15" onchange="saveCfg();render()"></div>
+      <div><label>Урона на 1 очко</label><input id="cfgDmg" type="number" min="1" value="100" onchange="saveCfg();render()"></div>
+    </div>
+    <details style="margin-top:12px">
+      <summary>Очки за место (топ) — изменить</summary>
+      <p class="muted">Формат: «место → очки», по убыванию. Диапазон задаётся верхней границей.</p>
+      <div id="placeTable"></div>
+    </details>
+    <div class="toolbar">
+      <button class="ghost" onclick="exportData()">📤 Экспорт (JSON)</button>
+      <button class="ghost" onclick="document.getElementById('importFile').click()">📥 Импорт</button>
+      <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
+      <button class="danger" onclick="resetAll()">🗑 Сбросить всё</button>
+    </div>
+  </div>
+
+  <footer>
+    Данные хранятся только в этом браузере (localStorage). Делитесь ссылкой — каждый ведёт свою таблицу.<br>
+    Формула: <b>место + килы×<span id="fK">15</span> + урон÷<span id="fD">100</span></b>
+  </footer>
+</div>
+
+<script>
+const KEY = 'pubgTournamentV1';
+
+const DEFAULT_PLACES = [
+  {max:1,pts:100},{max:2,pts:70},{max:3,pts:55},{max:4,pts:45},{max:5,pts:38},
+  {max:6,pts:32},{max:8,pts:24},{max:10,pts:18},{max:15,pts:12},{max:20,pts:8},
+  {max:30,pts:5},{max:50,pts:2},{max:100,pts:0}
+];
+
+let state = load();
+
+function load(){
+  try{
+    const s = JSON.parse(localStorage.getItem(KEY));
+    if(s && s.players) return normalize(s);
+  }catch(e){}
+  return {players:[], cfg:{kill:15, dmg:100, bestN:0, places:DEFAULT_PLACES.slice()}};
+}
+function normalize(s){
+  s.cfg = s.cfg || {};
+  s.cfg.kill = s.cfg.kill ?? 15;
+  s.cfg.dmg  = s.cfg.dmg ?? 100;
+  s.cfg.bestN = s.cfg.bestN ?? 0;
+  s.cfg.places = (s.cfg.places && s.cfg.places.length) ? s.cfg.places : DEFAULT_PLACES.slice();
+  s.players.forEach(p=>{ p.matches = p.matches || []; });
+  return s;
+}
+function save(){ localStorage.setItem(KEY, JSON.stringify(state)); }
+
+function placePoints(place){
+  if(!place || place<1) return 0;
+  const t = state.cfg.places;
+  for(const row of t){ if(place <= row.max) return row.pts; }
+  return 0;
+}
+function matchPoints(m){
+  const place = placePoints(m.place);
+  const kills = (m.kills||0) * state.cfg.kill;
+  const dmg = Math.floor((m.dmg||0) / state.cfg.dmg);
+  return {place, kills, dmg, total: place+kills+dmg};
+}
+function playerStats(p){
+  const rows = p.matches.map(m=>({m, pts:matchPoints(m)}));
+  let counted = rows.slice();
+  if(state.cfg.bestN>0 && rows.length>state.cfg.bestN){
+    counted = rows.slice().sort((a,b)=>b.pts.total-a.pts.total).slice(0,state.cfg.bestN);
+  }
+  const total = counted.reduce((s,r)=>s+r.pts.total,0);
+  const countedSet = new Set(counted.map(r=>r.m));
+  const kills = p.matches.reduce((s,m)=>s+(m.kills||0),0);
+  const wins = p.matches.filter(m=>m.place===1).length;
+  const dmg = p.matches.reduce((s,m)=>s+(m.dmg||0),0);
+  return {rows, total, countedSet, kills, wins, dmg, games:p.matches.length};
+}
+
+/* ---------- Actions ---------- */
+function addPlayer(){
+  const inp = document.getElementById('newPlayer');
+  const name = inp.value.trim();
+  if(!name) return;
+  if(state.players.some(p=>p.name.toLowerCase()===name.toLowerCase())){ alert('Такой игрок уже есть'); return; }
+  state.players.push({id:Date.now()+''+Math.floor(performance.now()), name, matches:[]});
+  inp.value=''; save(); render();
+}
+function removePlayer(id){
+  const p = state.players.find(x=>x.id===id);
+  if(p && (p.matches.length===0 || confirm('Удалить «'+p.name+'» и все его катки?'))){
+    state.players = state.players.filter(x=>x.id!==id); save(); render();
+  }
+}
+function addMatch(){
+  const pid = document.getElementById('mPlayer').value;
+  const p = state.players.find(x=>x.id===pid);
+  if(!p){ alert('Сначала добавьте игрока'); return; }
+  const place = parseInt(document.getElementById('mPlace').value)||0;
+  const kills = parseInt(document.getElementById('mKills').value)||0;
+  const dmg = parseInt(document.getElementById('mDmg').value)||0;
+  if(place<1){ alert('Укажите место (топ)'); return; }
+  p.matches.push({place, kills, dmg});
+  document.getElementById('mPlace').value='';
+  document.getElementById('mKills').value='';
+  document.getElementById('mDmg').value='';
+  save(); render(); updatePreview();
+  document.getElementById('mPlace').focus();
+}
+function removeMatch(pid, idx){
+  const p = state.players.find(x=>x.id===pid);
+  if(p){ p.matches.splice(idx,1); save(); render(); }
+}
+function saveCfg(){
+  state.cfg.kill = Math.max(0, parseInt(document.getElementById('cfgKill').value)||0);
+  state.cfg.dmg  = Math.max(1, parseInt(document.getElementById('cfgDmg').value)||1);
+  state.cfg.bestN= Math.max(0, parseInt(document.getElementById('bestN').value)||0);
+  save();
+}
+function resetAll(){
+  if(confirm('Удалить ВСЕХ игроков и катки? Настройки очков сбросятся к стандартным.')){
+    state = {players:[], cfg:{kill:15,dmg:100,bestN:0,places:DEFAULT_PLACES.slice()}};
+    save(); render();
+  }
+}
+function exportData(){
+  const blob = new Blob([JSON.stringify(state,null,2)],{type:'application/json'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob); a.download='pubg-tournament.json'; a.click();
+}
+function importData(e){
+  const f=e.target.files[0]; if(!f) return;
+  const r=new FileReader();
+  r.onload=()=>{ try{ state=normalize(JSON.parse(r.result)); save(); render(); alert('Загружено!'); }
+    catch(err){ alert('Не получилось прочитать файл'); } };
+  r.readAsText(f); e.target.value='';
+}
+
+/* ---------- Live preview ---------- */
+function updatePreview(){
+  const place = parseInt(document.getElementById('mPlace').value)||0;
+  const kills = parseInt(document.getElementById('mKills').value)||0;
+  const dmg = parseInt(document.getElementById('mDmg').value)||0;
+  const el = document.getElementById('livePreview');
+  if(!place){ el.innerHTML='Введите данные катки — покажу очки.'; return; }
+  const r = matchPoints({place,kills,dmg});
+  el.innerHTML = `Топ ${place}: <b>${r.place}</b> + килы ${kills}×${state.cfg.kill}=<b>${r.kills}</b> + урон ${dmg}÷${state.cfg.dmg}=<b>${r.dmg}</b> &nbsp;→&nbsp; <b>${r.total} очков</b>`;
+}
+['mPlace','mKills','mDmg'].forEach(id=>{
+  document.addEventListener('input',e=>{ if(e.target.id===id) updatePreview(); });
+});
+
+/* ---------- Render ---------- */
+let activeTab = null;
+function render(){
+  // cfg inputs
+  document.getElementById('cfgKill').value = state.cfg.kill;
+  document.getElementById('cfgDmg').value = state.cfg.dmg;
+  document.getElementById('bestN').value = state.cfg.bestN;
+  document.getElementById('fK').textContent = state.cfg.kill;
+  document.getElementById('fD').textContent = state.cfg.dmg;
+
+  // player list
+  const pl = document.getElementById('playerList');
+  pl.innerHTML = state.players.length ? '' : '<div class="muted">Пока нет игроков. Добавьте 2–3 участников.</div>';
+  state.players.forEach(p=>{
+    const st = playerStats(p);
+    const d = document.createElement('div');
+    d.className='lb-row'; d.style.marginBottom='6px';
+    d.innerHTML = `<div class="lb-name" style="font-size:14px">${esc(p.name)}
+        <span class="lb-sub">· ${st.games} катк. · ${st.total} очк.</span></div>
+        <span class="del" title="Удалить">✕</span>`;
+    d.querySelector('.del').onclick=()=>removePlayer(p.id);
+    pl.appendChild(d);
+  });
+
+  // match player select
+  const sel = document.getElementById('mPlayer');
+  const prev = sel.value;
+  sel.innerHTML = state.players.map(p=>`<option value="${p.id}">${esc(p.name)}</option>`).join('');
+  if(state.players.some(p=>p.id===prev)) sel.value=prev;
+
+  // leaderboard
+  const lb = document.getElementById('leaderboard');
+  const ranked = state.players.map(p=>({p, st:playerStats(p)})).sort((a,b)=>
+     b.st.total-a.st.total || b.st.wins-a.st.wins || b.st.kills-a.st.kills);
+  if(!ranked.length){ lb.innerHTML='<div class="empty">Добавьте игроков и катки — здесь появится таблица.</div>'; }
+  else {
+    lb.innerHTML='';
+    ranked.forEach((r,i)=>{
+      const row=document.createElement('div'); row.className='lb-row';
+      row.innerHTML=`<div class="lb-rank">${i+1}</div>
+        <div class="lb-name">${esc(r.p.name)}
+          <div class="lb-sub">${r.st.games} катк. · 🏆${r.st.wins} · 🔫${r.st.kills} килов · 💥${r.st.dmg} урона${state.cfg.bestN>0&&r.st.games>state.cfg.bestN?' · зачёт '+state.cfg.bestN+' лучших':''}</div>
+        </div>
+        <div class="lb-pts">${r.st.total}</div>`;
+      lb.appendChild(row);
+    });
+  }
+
+  // detail tabs
+  const tabs=document.getElementById('detailTabs');
+  if(!state.players.length){ tabs.innerHTML=''; document.getElementById('detail').innerHTML='<div class="empty">Нет данных.</div>'; }
+  else{
+    if(!state.players.some(p=>p.id===activeTab)) activeTab=state.players[0].id;
+    tabs.innerHTML=state.players.map(p=>`<div class="tab ${p.id===activeTab?'active':''}" onclick="activeTab='${p.id}';render()">${esc(p.name)}</div>`).join('');
+    renderDetail();
+  }
+  renderPlaceTable();
+  updatePreview();
+}
+
+function renderDetail(){
+  const p=state.players.find(x=>x.id===activeTab);
+  const el=document.getElementById('detail');
+  if(!p){ el.innerHTML=''; return; }
+  const st=playerStats(p);
+  if(!p.matches.length){ el.innerHTML='<div class="empty">У «'+esc(p.name)+'» пока нет каток.</div>'; return; }
+  let rows='';
+  p.matches.forEach((m,idx)=>{
+    const r=matchPoints(m);
+    const counted = st.countedSet.has(m);
+    rows+=`<tr style="${counted?'':'opacity:.4'}">
+      <td>${idx+1}</td><td>${m.place}</td><td>${r.place}</td>
+      <td>${m.kills||0}</td><td>${m.dmg||0}</td><td>${r.dmg}</td>
+      <td class="pts">${r.total}</td>
+      <td><span class="del" onclick="removeMatch('${p.id}',${idx})">✕</span></td></tr>`;
+  });
+  el.innerHTML=`<table>
+    <thead><tr><th>#</th><th>Место</th><th>Очк.место</th><th>Килы</th><th>Урон</th><th>Очк.урон</th><th>Сумма</th><th></th></tr></thead>
+    <tbody>${rows}</tbody>
+    <tfoot><tr><td colspan="6" class="l" style="color:var(--muted)">Итого${state.cfg.bestN>0&&p.matches.length>state.cfg.bestN?' (лучшие '+state.cfg.bestN+')':''}</td>
+      <td class="pts" style="font-size:15px">${st.total}</td><td></td></tr></tfoot>
+  </table>${state.cfg.bestN>0&&p.matches.length>state.cfg.bestN?'<p class="muted">Бледные строки не идут в зачёт (правило «лучших N»).</p>':''}`;
+}
+
+function renderPlaceTable(){
+  const el=document.getElementById('placeTable');
+  el.innerHTML = state.cfg.places.map((row,i)=>`
+    <div class="row" style="margin-bottom:6px">
+      <div><label>до места</label><input type="number" min="1" value="${row.max}" onchange="updPlace(${i},'max',this.value)"></div>
+      <div><label>очков</label><input type="number" min="0" value="${row.pts}" onchange="updPlace(${i},'pts',this.value)"></div>
+      <div style="flex:0 0 auto"><button class="danger" onclick="delPlace(${i})">✕</button></div>
+    </div>`).join('') +
+    `<button class="ghost" onclick="addPlace()">+ строка</button>`;
+}
+function updPlace(i,f,v){ state.cfg.places[i][f]=parseInt(v)||0; save(); render(); }
+function delPlace(i){ state.cfg.places.splice(i,1); save(); render(); }
+function addPlace(){ state.cfg.places.push({max:100,pts:0}); save(); render(); }
+
+function esc(s){ return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+document.getElementById('newPlayer').addEventListener('keydown',e=>{ if(e.key==='Enter') addPlayer(); });
+render();
+</script>
+</body>
+</html>
