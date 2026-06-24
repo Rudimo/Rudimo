@@ -112,6 +112,10 @@
       <div><label>Килы</label><input id="mKills" type="number" min="0" inputmode="numeric" placeholder="0"></div>
       <div><label>Урон</label><input id="mDmg" type="number" min="0" inputmode="numeric" placeholder="0"></div>
     </div>
+    <label style="display:flex;align-items:center;gap:8px;margin-top:10px;cursor:pointer">
+      <input type="checkbox" id="mSolo" style="width:auto" onchange="updatePreview()">
+      <span style="color:var(--txt);font-size:13px">🦸 Соло против сквадов (×<span id="soloMultLbl">1.4</span> к очкам катки)</span>
+    </label>
     <div class="preview" id="livePreview">Введите данные катки — покажу очки.</div>
     <div class="toolbar"><button onclick="addMatch()">Записать катку</button></div>
   </div>
@@ -138,9 +142,17 @@
     <div class="row">
       <div><label>Очки за килл</label><input id="cfgKill" type="number" min="0" value="15" onchange="saveCfg();render()"></div>
       <div><label>Урона на 1 очко</label><input id="cfgDmg" type="number" min="1" value="100" onchange="saveCfg();render()"></div>
+      <div><label>×множитель соло-vs-сквады</label><input id="cfgSolo" type="number" min="1" step="0.1" value="1.4" onchange="saveCfg();render()"></div>
+    </div>
+    <div style="margin-top:12px">
+      <label>Пресет таблицы мест</label>
+      <div class="toolbar" style="margin-top:0">
+        <button class="ghost" onclick="applyPreset('solo')">👤 Соло (100 мест)</button>
+        <button class="ghost" onclick="applyPreset('squad')">👥 Сквад (~28 команд)</button>
+      </div>
     </div>
     <details style="margin-top:12px">
-      <summary>Очки за место (топ) — изменить</summary>
+      <summary>Очки за место (топ) — изменить вручную</summary>
       <p class="muted">Формат: «место → очки», по убыванию. Диапазон задаётся верхней границей.</p>
       <div id="placeTable"></div>
     </details>
@@ -166,6 +178,11 @@ const DEFAULT_PLACES = [
   {max:6,pts:32},{max:8,pts:24},{max:10,pts:18},{max:15,pts:12},{max:20,pts:8},
   {max:30,pts:5},{max:50,pts:2},{max:100,pts:0}
 ];
+const SQUAD_PLACES = [
+  {max:1,pts:100},{max:2,pts:78},{max:3,pts:64},{max:4,pts:54},{max:5,pts:46},
+  {max:6,pts:40},{max:7,pts:34},{max:8,pts:28},{max:10,pts:22},{max:13,pts:16},
+  {max:17,pts:11},{max:22,pts:6},{max:28,pts:2}
+];
 
 let state = load();
 
@@ -174,13 +191,14 @@ function load(){
     const s = JSON.parse(localStorage.getItem(KEY));
     if(s && s.players) return normalize(s);
   }catch(e){}
-  return {players:[], cfg:{kill:15, dmg:100, bestN:0, places:DEFAULT_PLACES.slice()}};
+  return {players:[], cfg:{kill:15, dmg:100, bestN:0, soloVsSquad:1.4, places:DEFAULT_PLACES.slice()}};
 }
 function normalize(s){
   s.cfg = s.cfg || {};
   s.cfg.kill = s.cfg.kill ?? 15;
   s.cfg.dmg  = s.cfg.dmg ?? 100;
   s.cfg.bestN = s.cfg.bestN ?? 0;
+  s.cfg.soloVsSquad = s.cfg.soloVsSquad ?? 1.4;
   s.cfg.places = (s.cfg.places && s.cfg.places.length) ? s.cfg.places : DEFAULT_PLACES.slice();
   s.players.forEach(p=>{ p.matches = p.matches || []; });
   return s;
@@ -197,7 +215,9 @@ function matchPoints(m){
   const place = placePoints(m.place);
   const kills = (m.kills||0) * state.cfg.kill;
   const dmg = Math.floor((m.dmg||0) / state.cfg.dmg);
-  return {place, kills, dmg, total: place+kills+dmg};
+  const base = place+kills+dmg;
+  const mult = m.solo ? (state.cfg.soloVsSquad||1) : 1;
+  return {place, kills, dmg, base, mult, total: Math.round(base*mult)};
 }
 function playerStats(p){
   const rows = p.matches.map(m=>({m, pts:matchPoints(m)}));
@@ -235,11 +255,13 @@ function addMatch(){
   const place = parseInt(document.getElementById('mPlace').value)||0;
   const kills = parseInt(document.getElementById('mKills').value)||0;
   const dmg = parseInt(document.getElementById('mDmg').value)||0;
+  const solo = document.getElementById('mSolo').checked;
   if(place<1){ alert('Укажите место (топ)'); return; }
-  p.matches.push({place, kills, dmg});
+  p.matches.push({place, kills, dmg, solo});
   document.getElementById('mPlace').value='';
   document.getElementById('mKills').value='';
   document.getElementById('mDmg').value='';
+  document.getElementById('mSolo').checked=false;
   save(); render(); updatePreview();
   document.getElementById('mPlace').focus();
 }
@@ -251,11 +273,16 @@ function saveCfg(){
   state.cfg.kill = Math.max(0, parseInt(document.getElementById('cfgKill').value)||0);
   state.cfg.dmg  = Math.max(1, parseInt(document.getElementById('cfgDmg').value)||1);
   state.cfg.bestN= Math.max(0, parseInt(document.getElementById('bestN').value)||0);
+  state.cfg.soloVsSquad = Math.max(1, parseFloat(document.getElementById('cfgSolo').value)||1);
   save();
+}
+function applyPreset(kind){
+  state.cfg.places = (kind==='squad'?SQUAD_PLACES:DEFAULT_PLACES).map(r=>({...r}));
+  save(); render();
 }
 function resetAll(){
   if(confirm('Удалить ВСЕХ игроков и катки? Настройки очков сбросятся к стандартным.')){
-    state = {players:[], cfg:{kill:15,dmg:100,bestN:0,places:DEFAULT_PLACES.slice()}};
+    state = {players:[], cfg:{kill:15,dmg:100,bestN:0,soloVsSquad:1.4,places:DEFAULT_PLACES.map(r=>({...r}))}};
     save(); render();
   }
 }
@@ -278,9 +305,12 @@ function updatePreview(){
   const kills = parseInt(document.getElementById('mKills').value)||0;
   const dmg = parseInt(document.getElementById('mDmg').value)||0;
   const el = document.getElementById('livePreview');
+  const solo = document.getElementById('mSolo').checked;
   if(!place){ el.innerHTML='Введите данные катки — покажу очки.'; return; }
-  const r = matchPoints({place,kills,dmg});
-  el.innerHTML = `Топ ${place}: <b>${r.place}</b> + килы ${kills}×${state.cfg.kill}=<b>${r.kills}</b> + урон ${dmg}÷${state.cfg.dmg}=<b>${r.dmg}</b> &nbsp;→&nbsp; <b>${r.total} очков</b>`;
+  const r = matchPoints({place,kills,dmg,solo});
+  let s = `Топ ${place}: <b>${r.place}</b> + килы ${kills}×${state.cfg.kill}=<b>${r.kills}</b> + урон ${dmg}÷${state.cfg.dmg}=<b>${r.dmg}</b>`;
+  if(solo) s += ` &nbsp;=&nbsp; ${r.base} ×${r.mult}`;
+  el.innerHTML = s + ` &nbsp;→&nbsp; <b>${r.total} очков</b>`;
 }
 ['mPlace','mKills','mDmg'].forEach(id=>{
   document.addEventListener('input',e=>{ if(e.target.id===id) updatePreview(); });
@@ -292,9 +322,11 @@ function render(){
   // cfg inputs
   document.getElementById('cfgKill').value = state.cfg.kill;
   document.getElementById('cfgDmg').value = state.cfg.dmg;
+  document.getElementById('cfgSolo').value = state.cfg.soloVsSquad;
   document.getElementById('bestN').value = state.cfg.bestN;
   document.getElementById('fK').textContent = state.cfg.kill;
   document.getElementById('fD').textContent = state.cfg.dmg;
+  document.getElementById('soloMultLbl').textContent = state.cfg.soloVsSquad;
 
   // player list
   const pl = document.getElementById('playerList');
@@ -357,9 +389,9 @@ function renderDetail(){
     const r=matchPoints(m);
     const counted = st.countedSet.has(m);
     rows+=`<tr style="${counted?'':'opacity:.4'}">
-      <td>${idx+1}</td><td>${m.place}</td><td>${r.place}</td>
+      <td>${idx+1}${m.solo?' 🦸':''}</td><td>${m.place}</td><td>${r.place}</td>
       <td>${m.kills||0}</td><td>${m.dmg||0}</td><td>${r.dmg}</td>
-      <td class="pts">${r.total}</td>
+      <td class="pts">${r.total}${m.solo?'<div class="lb-sub" style="font-size:10px">×'+r.mult+'</div>':''}</td>
       <td><span class="del" onclick="removeMatch('${p.id}',${idx})">✕</span></td></tr>`;
   });
   el.innerHTML=`<table>
