@@ -1,8 +1,9 @@
 <!-- ╔══════════════════════════════════════════════════════════════╗ -->
-<!-- ║              Dmitrii Kshevskii · DK · @Rudimo                 ║ -->
+<!-- ║   Dmitrii Kshevskii · DK · code: @Rudimo · aka RudiRacer      ║ -->
+<!-- ║   Profile README → goes into the Rudimo/Rudimo repo           ║ -->
 <!-- ╚══════════════════════════════════════════════════════════════╝ -->
 
-<a href="https://github.com/Rudimo">
+<a href="https://kshevskii.com">
   <img width="100%" src="https://capsule-render.vercel.app/api?type=waving&color=0:8A2BE2,100:00C2FF&height=220&section=header&text=Dmitrii%20Kshevskii&fontSize=56&fontColor=ffffff&fontAlignY=36&desc=DK%20·%20aka%20RudiRacer%20·%20aka%20easy%20movie%20—%20Founder%20%26%20CTO%20·%20AI%20%26%20Web3%20Engineer&descAlignY=58&descSize=18&animation=fadeIn" alt="header"/>
 </a>
 
@@ -13,6 +14,8 @@
 </p>
 
 <p align="center">
+  <a href="https://kshevskii.com"><img src="https://img.shields.io/badge/kshevskii.com-personal%20site-00C2FF?style=flat-square&logo=safari&logoColor=white" alt="site"/></a>
+  &nbsp;
   <img src="https://komarev.com/ghpvc/?username=Rudimo&style=flat-square&color=8A2BE2&label=profile+views" alt="views"/>
   &nbsp;
   <img src="https://img.shields.io/badge/Based%20in-Phuket%20%F0%9F%8F%9D%EF%B8%8F-00C2FF?style=flat-square" alt="location"/>
@@ -29,6 +32,7 @@
 ```ts
 const dk = {
   name:      "Dmitrii Kshevskii",          // friends call me DK
+  code:      "rudimo",                      // my handle in engineering
   aliases:   ["RudiRacer 🏎️", "easy movie 🎬"],
   role:      ["Founder & CTO", "Tech Lead", "Full-stack Engineer"],
   baseline:  "12+ years, idea → high-load production",
@@ -39,12 +43,14 @@ const dk = {
 ```
 
 - 🚀 **12+ years** shipping products end-to-end — architecture, teams, and the last 5% that makes things feel *premium*.
-- 🤖 Building **[postim.life](https://postim.life)** — an AI-native SMM & content-automation platform: multi-tenant CRM, 11 social networks, Telegram-first, AI agents that post / moderate / direct streams for you.
+- 🤖 Building **[postim.life](https://postim.life)** — an AI-native SMM & content-automation platform: multi-tenant CRM, multiple social networks, Telegram-first, AI agents that post / moderate / direct streams for you.
 - ⛓️ All-in on **Web3 / TON** and **Telegram Mini Apps** — no classic websites: auth, payments and UX live entirely inside Telegram.
 - 🎬 Building **Timeline Studio** — a **Tauri + Rust + FFmpeg** desktop video editor for streamers & creators.
 - 🕹️ Background in **high-load real-time gaming platforms** — microservices, websockets, millions of events a day.
 - 🏎️ **RudiRacer** on the track, **easy movie** behind the camera — speed and storytelling feed back into how I build.
 - 🧩 I care about **developer experience**, clean architecture, and products that feel alive.
+
+> 💻 In code I'm **`rudimo`** · everywhere else I'm **DK** — find the full story at **[kshevskii.com](https://kshevskii.com)**.
 
 ---
 
@@ -104,8 +110,9 @@ const dk = {
 ### 📫 Let's build something
 
 <p>
-  <a href="https://postim.life"><img src="https://img.shields.io/badge/Website-postim.life-00C2FF?style=flat-square&logo=safari&logoColor=white"/></a>
-  <a href="mailto:rudimo@yandex.ru"><img src="https://img.shields.io/badge/Email-rudimo-FF3860?style=flat-square&logo=maildotru&logoColor=white"/></a>
+  <a href="https://kshevskii.com"><img src="https://img.shields.io/badge/Personal-kshevskii.com-8A2BE2?style=flat-square&logo=safari&logoColor=white"/></a>
+  <a href="https://postim.life"><img src="https://img.shields.io/badge/Product-postim.life-00C2FF?style=flat-square&logo=safari&logoColor=white"/></a>
+  <a href="mailto:dk@postim.life"><img src="https://img.shields.io/badge/Email-dk@postim.life-FF3860?style=flat-square&logo=maildotru&logoColor=white"/></a>
   <a href="https://wakatime.com/@RudiRacer"><img src="https://img.shields.io/badge/WakaTime-@RudiRacer-1A1A1A?style=flat-square&logo=wakatime&logoColor=white"/></a>
 </p>
 
