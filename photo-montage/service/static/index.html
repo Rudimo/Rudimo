@@ -18,11 +18,10 @@
   .drop.over{border-color:var(--accent);color:var(--accent)}
   .drop img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:10px}
   label.lbl{display:block;color:var(--dim);font-size:12px;text-transform:uppercase;letter-spacing:.08em;margin:16px 0 6px}
-  textarea,input[type=text],input[type=password]{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:10px;color:var(--text);padding:10px 12px;font:inherit;resize:vertical}
-  .chips{display:flex;flex-wrap:wrap;gap:8px}
+  textarea,input[type=password]{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:10px;color:var(--text);padding:10px 12px;font:inherit;resize:vertical}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;min-height:20px}
   .chip{border:1px solid var(--line);border-radius:100px;padding:6px 14px;cursor:pointer;color:var(--dim);user-select:none;transition:.12s}
   .chip.on{border-color:var(--accent);color:var(--accent);background:rgba(232,163,61,.08)}
-  .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
   .btn{background:var(--accent);color:#151007;border:0;border-radius:10px;padding:12px 22px;font:600 15px/1 inherit;cursor:pointer;margin-top:18px;width:100%}
   .btn:disabled{opacity:.45;cursor:default}
   .bar{height:6px;background:var(--line);border-radius:3px;overflow:hidden;margin-top:14px;display:none}
@@ -33,24 +32,25 @@
   .shot img{width:100%;display:block;aspect-ratio:16/10;object-fit:cover}
   .shot .m{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;font-size:13px;color:var(--dim)}
   .shot a{color:var(--accent);text-decoration:none}
+  .shot .broken{padding:26px 12px;text-align:center;color:var(--err);font-size:13px}
   .errbox{color:var(--err);font-size:13px;white-space:pre-wrap;margin-top:10px}
 </style>
 </head>
 <body>
 <div class="wrap">
   <h1>🎬 Cinematic Montage</h1>
-  <p class="sub">Редактирование фото с сохранением людей: свет, глубина, новые объекты в сцене. Nano Banana Pro.</p>
+  <p class="sub">Редактирование фото с сохранением людей: свет, глубина, новые объекты в сцене.</p>
 
   <div class="grid">
     <div class="card">
       <div class="drop" id="drop">
-        <span id="dropHint">Перетащите фото или кликните</span>
+        <span id="dropHint">Перетащите фото (JPEG/PNG/WebP) или кликните</span>
         <input type="file" id="file" accept="image/jpeg,image/png,image/webp" hidden>
       </div>
       <label class="lbl">Что добавить/изменить в сцене</label>
       <textarea id="prompt" rows="4" placeholder="Например: add two female Russian police officers in dress uniform behind the men, and a lowered UAZ Patriot police pickup in the background…"></textarea>
-      <label class="lbl">Токен сервиса (если включён)</label>
-      <input type="password" id="token" placeholder="Bearer-токен, хранится только в этом браузере">
+      <label class="lbl">Токен сервиса</label>
+      <input type="password" id="token" placeholder="Bearer-токен (сохраняется в localStorage браузера)">
     </div>
 
     <div class="card">
@@ -90,33 +90,57 @@
 
 <script>
 const $=s=>document.querySelector(s);
-let file=null, polling=null;
+const ALLOWED_TYPES=['image/jpeg','image/png','image/webp'];
+let file=null, polling=null, maxTasks=24, catalogsLoaded=false;
 
 const authHeaders=()=>{const t=$('#token').value.trim();return t?{'Authorization':'Bearer '+t}:{}};
 
-fetch('/api/styles',{headers:authHeaders()}).then(r=>r.ok?r.json():{}).then(st=>{
-  const box=$('#styles');
-  for(const [k,title] of Object.entries(st)){
-    const c=document.createElement('span');
-    c.className='chip'+(k==='golden'?' on':'');c.dataset.v=k;c.textContent=title;
-    box.appendChild(c);
-  }
+// --- токен: сохраняем в localStorage, при изменении перезагружаем каталоги ---
+$('#token').value=localStorage.getItem('svc_token')||'';
+$('#token').addEventListener('change',()=>{
+  localStorage.setItem('svc_token',$('#token').value.trim());
+  loadCatalogs();
 });
 
-fetch('/api/models',{headers:authHeaders()}).then(r=>r.ok?r.json():{models:{}}).then(({default:def,models})=>{
-  const box=$('#models');
-  for(const [k,title] of Object.entries(models)){
-    const c=document.createElement('span');
-    c.className='chip'+(k===def?' on':'');c.dataset.v=k;c.textContent=title;
-    box.appendChild(c);
+async function loadCatalogs(){
+  catalogsLoaded=false;
+  $('#models').innerHTML='';$('#styles').innerHTML='';
+  try{
+    const [sr,mr]=await Promise.all([
+      fetch('/api/styles',{headers:authHeaders()}),
+      fetch('/api/models',{headers:authHeaders()}),
+    ]);
+    if(!sr.ok||!mr.ok)throw new Error(sr.ok?mr.status:sr.status);
+    const st=await sr.json();
+    const {default:def,models,max_tasks_per_job}=await mr.json();
+    if(max_tasks_per_job)maxTasks=max_tasks_per_job;
+    for(const [k,title] of Object.entries(st)){
+      const c=document.createElement('span');
+      c.className='chip'+(k==='golden'?' on':'');c.dataset.v=k;c.textContent=title;
+      $('#styles').appendChild(c);
+    }
+    for(const [k,title] of Object.entries(models)){
+      const c=document.createElement('span');
+      c.className='chip'+(k===def?' on':'');c.dataset.v=k;c.textContent=title;
+      $('#models').appendChild(c);
+    }
+    catalogsLoaded=true;
+    $('#errors').textContent='';
+  }catch(e){
+    $('#errors').textContent=(''+e).includes('401')
+      ?'Неверный или пустой токен — введите токен сервиса, каталоги перезагрузятся.'
+      :'Не удалось загрузить списки моделей/стилей: '+e.message;
   }
-});
+  updateGo();
+}
+loadCatalogs();
 
 document.addEventListener('click',e=>{
   const chip=e.target.closest('.chip');if(!chip)return;
   const single=['variants','sizes','models'].includes(chip.parentElement.id);
   if(single)chip.parentElement.querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));
   chip.classList.toggle('on',single?true:!chip.classList.contains('on'));
+  updateGo();
 });
 
 const drop=$('#drop');
@@ -127,13 +151,34 @@ drop.addEventListener('drop',e=>{e.preventDefault();drop.classList.remove('over'
 $('#file').addEventListener('change',e=>setFile(e.target.files[0]));
 
 function setFile(f){
-  if(!f||!f.type.startsWith('image/'))return;
-  file=f;$('#go').disabled=false;
+  if(!f)return;
+  if(!ALLOWED_TYPES.includes(f.type)){$('#errors').textContent='Только JPEG, PNG или WebP.';return}
+  $('#errors').textContent='';
+  file=f;
   const img=document.createElement('img');img.src=URL.createObjectURL(f);
   drop.querySelectorAll('img').forEach(i=>i.remove());drop.appendChild(img);
+  updateGo();
 }
 
 const picked=id=>[...document.querySelectorAll(`#${id} .chip.on`)].map(c=>c.dataset.v);
+
+function comboCount(){
+  const styles=Math.max(picked('styles').length,1);
+  return styles*picked('aspects').length*(+picked('variants')[0]||1);
+}
+
+function updateGo(){
+  const n=comboCount(), aspects=picked('aspects').length;
+  const btn=$('#go');
+  let msg='';
+  if(!file)msg='выберите фото';
+  else if(!catalogsLoaded)msg='каталоги не загружены';
+  else if(!aspects)msg='выберите ориентацию';
+  else if(!picked('models').length)msg='выберите нейросеть';
+  else if(n>maxTasks)msg=`слишком много комбинаций: ${n} > ${maxTasks}`;
+  btn.disabled=!!msg||!!polling;
+  btn.textContent=msg?`Сгенерировать — ${msg}`:`Сгенерировать (${n} ${n===1?'картинка':n<5?'картинки':'картинок'})`;
+}
 
 $('#go').addEventListener('click',async()=>{
   if(!file)return;
@@ -151,28 +196,38 @@ $('#go').addEventListener('click',async()=>{
   const fd=new FormData();fd.append('image',file);fd.append('payload',JSON.stringify(payload));
   try{
     const r=await fetch('/api/jobs',{method:'POST',body:fd,headers:authHeaders()});
-    if(!r.ok)throw new Error((await r.json()).detail||r.status);
-    const {job_id}=await r.json();
-    poll(job_id);
+    const body=await r.json().catch(()=>({}));
+    if(!r.ok)throw new Error(body.detail||('HTTP '+r.status));
+    poll(body.job_id);
   }catch(e){fail('Ошибка: '+e.message)}
 });
 
-function fail(msg){$('#status').textContent='';$('#errors').textContent=msg;$('#go').disabled=false;$('#bar').style.display='none'}
+function fail(msg){
+  clearInterval(polling);polling=null;
+  $('#status').textContent='';$('#errors').textContent=msg;
+  $('#bar').style.display='none';updateGo();
+}
 
 function poll(id){
   clearInterval(polling);
+  let failures=0;
   polling=setInterval(async()=>{
     let j;
     try{
       const r=await fetch('/api/jobs/'+id,{headers:authHeaders()});
-      if(!r.ok)throw new Error(r.status);
+      if(r.status===401||r.status===404)return fail('Опрос задачи не удался: HTTP '+r.status);
+      if(!r.ok)throw new Error('HTTP '+r.status);
       j=await r.json();
-    }catch(e){return}
+      failures=0;
+    }catch(e){
+      if(++failures>=5)fail('Опрос задачи не удался: '+e.message);
+      return;
+    }
     $('#bar i').style.width=Math.round(100*j.completed/j.total)+'%';
     $('#status').textContent=`Готово ${j.completed}/${j.total} · статус: ${j.status}`;
     render(j);
     if(['done','partial','failed'].includes(j.status)){
-      clearInterval(polling);$('#go').disabled=false;
+      clearInterval(polling);polling=null;updateGo();
       if(j.errors.length)$('#errors').textContent=j.errors.map(e=>e.task+': '+e.error).join('\n');
     }
   },2500);
@@ -183,13 +238,14 @@ function render(j){
   for(const img of j.images){
     if(document.getElementById(img.name))continue;
     const d=document.createElement('div');d.className='shot';d.id=img.name;
-    const t=$('#token').value.trim();
-    const src=img.url+(t?'':'');
     d.innerHTML=`<img loading="lazy"><div class="m"><span>${img.style} · ${img.aspect}</span><a download="${img.name}">скачать</a></div>`;
-    fetch(img.url,{headers:authHeaders()}).then(r=>r.blob()).then(b=>{
-      const u=URL.createObjectURL(b);
-      d.querySelector('img').src=u;d.querySelector('a').href=u;
-    });
+    fetch(img.url,{headers:authHeaders()})
+      .then(r=>{if(!r.ok)throw new Error('HTTP '+r.status);return r.blob()})
+      .then(b=>{
+        const u=URL.createObjectURL(b);
+        d.querySelector('img').src=u;d.querySelector('a').href=u;
+      })
+      .catch(e=>{d.innerHTML=`<div class="broken">не загрузилась: ${e.message}</div>`});
     g.appendChild(d);
   }
 }

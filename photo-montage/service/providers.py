@@ -5,10 +5,13 @@
 Бросают ProviderError с понятным сообщением.
 """
 import base64
+import logging
 import os
 import time
 
 import requests
+
+log = logging.getLogger("montage.providers")
 
 OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
 GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
@@ -24,21 +27,25 @@ class ProviderError(RuntimeError):
 
 
 def _retrying_post(url, *, headers, json_payload, timeout, attempts=3):
+    """Полные тела ошибок — только в серверный лог; клиенту — краткий статус."""
     last = None
     for attempt in range(1, attempts + 1):
         try:
             r = requests.post(url, headers=headers, json=json_payload, timeout=timeout)
         except requests.RequestException as e:
-            last = f"network error: {e}"
+            log.warning("provider network error (%s attempt %d): %s", url, attempt, e)
+            last = "provider network error (see server logs)"
         else:
             if r.status_code == 200:
                 return r
-            last = f"HTTP {r.status_code}: {r.text[:300]}"
+            log.warning("provider HTTP %d (%s attempt %d): %s",
+                        r.status_code, url, attempt, r.text[:500])
+            last = f"provider HTTP {r.status_code} (see server logs)"
             if r.status_code not in RETRIABLE:
                 raise ProviderError(last)
         if attempt < attempts:
             time.sleep(5 * attempt)
-    raise ProviderError(last or "unknown error")
+    raise ProviderError(last or "unknown provider error")
 
 
 def generate_openrouter(prompt, image_bytes, image_mime, aspect, image_size, model=None):
@@ -65,8 +72,8 @@ def generate_openrouter(prompt, image_bytes, image_mime, aspect, image_size, mod
     msg = r.json()["choices"][0]["message"]
     imgs = msg.get("images") or []
     if not imgs:
-        text = str(msg.get("content") or "")[:200]
-        raise ProviderError(f"no image in response: {text}")
+        log.warning("no image in OpenRouter response: %s", str(msg.get("content"))[:300])
+        raise ProviderError("no image in provider response (see server logs)")
     url = imgs[0]["image_url"]["url"]  # data:image/png;base64,...
     return base64.b64decode(url.split(",", 1)[1])
 

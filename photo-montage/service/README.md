@@ -10,11 +10,14 @@
 ```bash
 cd photo-montage/service
 pip install -r requirements.txt
-cp .env.example .env            # вписать OPENROUTER_API_KEY
+cp .env.example .env            # вписать OPENROUTER_API_KEY и SERVICE_TOKEN
 set -a; source .env; set +a
-uvicorn app:app --port 8853
+uvicorn app:app --port 8853     # либо ALLOW_NO_AUTH=1 uvicorn ... для локалки
 # UI: http://localhost:8853
 ```
+
+Без `SERVICE_TOKEN` сервис не стартует (fail-closed) — для разработки без
+токена нужно явно передать `ALLOW_NO_AUTH=1`.
 
 ## Прод (Docker)
 
@@ -77,6 +80,17 @@ export async function POST(req: Request) {
 
 Статус и картинки проксируются так же (`GET /api/jobs/{id}`), либо фронт ходит
 в сервис напрямую с тем же Bearer-токеном.
+
+## Эксплуатация
+
+- **Backpressure:** очередь генераций ограничена `MAX_PENDING_TASKS` (96) —
+  при переполнении `POST /api/jobs` отвечает 429, клиенту нужно повторить позже.
+- **Рестарты:** задачи, находившиеся в очереди в момент перезапуска, честно
+  помечаются `failed`/`partial` с ошибкой «interrupted by service restart» —
+  зависших навсегда `running` не бывает. Записи на диск атомарные.
+- **Диск:** каталоги задач в `DATA_DIR` не удаляются автоматически — повесьте
+  крон-чистку по возрасту, например: `find /data -maxdepth 1 -mtime +14 -exec rm -rf {} +`.
+- **OpenAPI-доки** (`/docs`, `/openapi.json`) в проде выключены.
 
 ## Добавить нейросеть
 
