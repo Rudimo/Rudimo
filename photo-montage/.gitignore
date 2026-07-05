@@ -1,0 +1,9 @@
+out/
+out_gemini/
+__pycache__/
+*.jpeg
+*.jpg
+*.png
+data/
+.env
+!service/static/*.html

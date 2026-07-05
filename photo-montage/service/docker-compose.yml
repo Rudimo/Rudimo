@@ -1,0 +1,12 @@
+services:
+  montage:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "8853:8000"
+    env_file: .env
+    volumes:
+      - montage-data:/data
+
+volumes:
+  montage-data:
