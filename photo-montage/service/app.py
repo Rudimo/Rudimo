@@ -22,7 +22,7 @@ import uuid
 from concurrent.futures import ThreadPoolExecutor
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, Depends, HTTPException, Request, UploadFile, File, Form
+from fastapi import FastAPI, Depends, Header, HTTPException, Request, UploadFile, File, Form
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 
@@ -57,6 +57,8 @@ jobs: dict[str, dict] = {}
 jobs_lock = threading.Lock()
 pending_tasks = 0
 pending_lock = threading.Lock()
+# BYOK-ключ провайдера на время job — ТОЛЬКО в памяти, никогда не пишется в manifest.
+provider_keys: dict[str, str] = {}
 
 
 def _atomic_write_bytes(path: pathlib.Path, data: bytes):
@@ -188,7 +190,8 @@ def _run_task(job_id: str, task: dict):
         try:
             source = _job_dir(job_id) / "source.bin"
             raw = provider_fn(task["prompt"], source.read_bytes(), job["image_mime"],
-                              task["aspect"], job["image_size"], job.get("model"))
+                              task["aspect"], job["image_size"], job.get("model"),
+                              provider_keys.get(job_id))
             _atomic_write_bytes(_job_dir(job_id) / name, raw)
             result = {"name": name, "style": task["style"], "aspect": task["aspect"],
                       "variant": task["variant"],
@@ -211,6 +214,7 @@ def _run_task(job_id: str, task: dict):
                                  else "partial" if job["images"] else "failed")
             _save_manifest(job)
         if job.get("status") != "running":
+            provider_keys.pop(job_id, None)  # секрет живёт не дольше job
             _evict_terminal_jobs()
     finally:
         with pending_lock:
@@ -218,7 +222,8 @@ def _run_task(job_id: str, task: dict):
 
 
 @app.post("/api/jobs", dependencies=[Depends(require_token)])
-async def create_job(image: UploadFile = File(...), payload: str = Form("{}")):
+async def create_job(image: UploadFile = File(...), payload: str = Form("{}"),
+                     x_provider_key: str | None = Header(default=None)):
     global pending_tasks
     # Лимит размера — потоково, не читая всё тело заранее
     max_bytes = MAX_UPLOAD_MB * 1024 * 1024
@@ -313,10 +318,14 @@ async def create_job(image: UploadFile = File(...), payload: str = Form("{}")):
         }
         with jobs_lock:
             jobs[job_id] = job
+        # BYOK-ключ (если прислан) — только в памяти, не в манифест
+        if x_provider_key:
+            provider_keys[job_id] = x_provider_key
         _save_manifest(job)
     except BaseException:
         with pending_lock:
             pending_tasks -= len(tasks)
+        provider_keys.pop(job_id, None)
         raise
 
     for task in tasks:

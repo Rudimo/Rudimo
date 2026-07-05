@@ -48,8 +48,10 @@ def _retrying_post(url, *, headers, json_payload, timeout, attempts=3):
     raise ProviderError(last or "unknown provider error")
 
 
-def generate_openrouter(prompt, image_bytes, image_mime, aspect, image_size, model=None):
-    api_key = os.environ.get("OPENROUTER_API_KEY")
+def generate_openrouter(prompt, image_bytes, image_mime, aspect, image_size,
+                        model=None, provider_key=None):
+    # BYOK: ключ на один запрос (из X-Provider-Key) имеет приоритет над центральным.
+    api_key = provider_key or os.environ.get("OPENROUTER_API_KEY")
     if not api_key:
         raise ProviderError("OPENROUTER_API_KEY is not set")
     data_url = f"data:{image_mime};base64,{base64.b64encode(image_bytes).decode()}"
@@ -78,8 +80,10 @@ def generate_openrouter(prompt, image_bytes, image_mime, aspect, image_size, mod
     return base64.b64decode(url.split(",", 1)[1])
 
 
-def generate_gemini(prompt, image_bytes, image_mime, aspect, image_size, model=None):
-    api_key = os.environ.get("GEMINI_API_KEY")
+def generate_gemini(prompt, image_bytes, image_mime, aspect, image_size,
+                    model=None, provider_key=None):
+    # BYOK: ключ на один запрос (из X-Provider-Key) имеет приоритет над центральным.
+    api_key = provider_key or os.environ.get("GEMINI_API_KEY")
     if not api_key:
         raise ProviderError("GEMINI_API_KEY is not set")
     payload = {
