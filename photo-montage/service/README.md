@@ -60,6 +60,14 @@ docker compose up -d --build
 
 - `model_id` — из `/api/models` (`nano-banana-pro`, `nano-banana`,
   `gemini-pro-direct`, `gemini-flash-direct`); либо вручную `provider` + `model`.
+
+### BYOK: ключ провайдера на запрос
+
+Заголовок `X-Provider-Key` на `POST /api/jobs` переопределяет центральный ключ
+провайдера (`OPENROUTER_API_KEY`/`GEMINI_API_KEY`) **только для этой задачи** —
+так платформа может генерировать на ключе конкретного тенанта. Ключ живёт
+только в памяти на время job, никогда не пишется в манифест на диск. Если
+заголовок не прислан — используется центральный ключ из env (как раньше).
 - `styles` можно опустить и передать только `prompt` и/или `custom_style`.
 - Комбинаций (стили × ориентации × дубли) — не больше `MAX_TASKS_PER_JOB` (24).
 
